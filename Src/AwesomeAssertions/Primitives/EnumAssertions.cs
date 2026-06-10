@@ -473,16 +473,10 @@ public class EnumAssertions<TEnum, TAssertions>
         CurrentAssertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:the enum} to be one of {0}{reason}, but found <null>", validValues);
-
-        if (CurrentAssertionChain.Succeeded)
-        {
-            CurrentAssertionChain
-#pragma warning disable S3655 // Empty nullable value should not be accessed: AssertionChain.Succeeded makes sure, that this doesn't happen
-                .ForCondition(validValues.Contains(Subject!.Value))
-#pragma warning restore S3655
-                .FailWith("Expected {context:the enum} to be one of {0}{reason}, but found {1}.", validValues, Subject);
-        }
+            .FailWith("Expected {context:the enum} to be one of {0}{reason}, but found <null>", validValues)
+            .Then
+            .ForCondition(() => validValues.Contains(Subject.Value))
+            .FailWith("Expected {context:the enum} to be one of {0}{reason}, but found {1}.", validValues, Subject);
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
