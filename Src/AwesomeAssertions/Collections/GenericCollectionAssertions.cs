@@ -1576,22 +1576,22 @@ public class GenericCollectionAssertions<TCollection, T, TAssertions> : Referenc
         int expected,
         [StringSyntax("CompositeFormat")] string because = "", params object[] becauseArgs)
     {
+        int actualCount = 0;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:collection} to contain {0} item(s){reason}, but found <null>.", expected);
-
-        if (assertionChain.Succeeded)
-        {
-            int actualCount = Subject!.Count();
-
-            assertionChain
-                .ForCondition(actualCount == expected)
-                .BecauseOf(because, becauseArgs)
-                .FailWith(
-                    "Expected {context:collection} to contain {0} item(s){reason}, but found {1}: {2}.",
-                    expected, actualCount, Subject);
-        }
+            .FailWith("Expected {context:collection} to contain {0} item(s){reason}, but found <null>.", expected)
+            .Then
+            .ForCondition(() =>
+            {
+                actualCount = Subject.Count();
+                return actualCount == expected;
+            })
+            .BecauseOf(because, becauseArgs)
+            .FailWith(
+                "Expected {context:collection} to contain {0} item(s){reason}, but found {1}: {2}.",
+                expected, actualCount, Subject);
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -1935,24 +1935,22 @@ public class GenericCollectionAssertions<TCollection, T, TAssertions> : Referenc
         Guard.ThrowIfArgumentIsNull(otherCollection, nameof(otherCollection),
             "Cannot verify intersection against a <null> collection.");
 
+        IEnumerable<T> sharedItems = [];
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:collection} to intersect with {0}{reason}, but found <null>.", otherCollection);
-
-        IEnumerable<T> sharedItems = [];
-
-        if (assertionChain.Succeeded)
-        {
-            sharedItems = Subject!.Intersect(otherCollection);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(sharedItems.Any())
-                .FailWith(
-                    "Expected {context:collection} to intersect with {0}{reason}, but {1} does not contain any shared items.",
-                    otherCollection, Subject);
-        }
+            .FailWith("Expected {context:collection} to intersect with {0}{reason}, but found <null>.", otherCollection)
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                sharedItems = Subject.Intersect(otherCollection);
+                return sharedItems.Any();
+            })
+            .FailWith(
+                "Expected {context:collection} to intersect with {0}{reason}, but {1} does not contain any shared items.",
+                otherCollection, Subject);
 
         return new AndWhichConstraint<TAssertions, IEnumerable<T>>((TAssertions)this, sharedItems);
     }
