@@ -45,23 +45,24 @@ public class AssemblyAssertions : ReferenceTypeAssertions<Assembly, AssemblyAsse
 
         var assemblyName = assembly.GetName().Name;
 
+        var subjectName = "";
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith("Expected assembly not to reference assembly {0}{reason}, but {context:assembly} is <null>.",
-                assemblyName);
+                assemblyName)
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                subjectName = Subject.GetName().Name;
 
-        if (assertionChain.Succeeded)
-        {
-            var subjectName = Subject!.GetName().Name;
+                IEnumerable<string> references = Subject.GetReferencedAssemblies().Select(x => x.Name);
 
-            IEnumerable<string> references = Subject.GetReferencedAssemblies().Select(x => x.Name);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(!references.Contains(assemblyName))
-                .FailWith("Expected assembly {0} not to reference assembly {1}{reason}.", subjectName, assemblyName);
-        }
+                return !references.Contains(assemblyName);
+            })
+            .FailWith("Expected assembly {0} not to reference assembly {1}{reason}.", subjectName, assemblyName);
 
         return new AndConstraint<AssemblyAssertions>(this);
     }
@@ -86,22 +87,23 @@ public class AssemblyAssertions : ReferenceTypeAssertions<Assembly, AssemblyAsse
 
         var assemblyName = assembly.GetName().Name;
 
+        var subjectName = "";
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected assembly to reference assembly {0}{reason}, but {context:assembly} is <null>.", assemblyName);
+            .FailWith("Expected assembly to reference assembly {0}{reason}, but {context:assembly} is <null>.", assemblyName)
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                subjectName = Subject.GetName().Name;
 
-        if (assertionChain.Succeeded)
-        {
-            var subjectName = Subject!.GetName().Name;
+                IEnumerable<string> references = Subject.GetReferencedAssemblies().Select(x => x.Name);
 
-            IEnumerable<string> references = Subject.GetReferencedAssemblies().Select(x => x.Name);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(references.Contains(assemblyName))
-                .FailWith("Expected assembly {0} to reference assembly {1}{reason}, but it does not.", subjectName, assemblyName);
-        }
+                return references.Contains(assemblyName);
+            })
+            .FailWith("Expected assembly {0} to reference assembly {1}{reason}, but it does not.", subjectName, assemblyName);
 
         return new AndConstraint<AssemblyAssertions>(this);
     }
@@ -126,24 +128,23 @@ public class AssemblyAssertions : ReferenceTypeAssertions<Assembly, AssemblyAsse
     {
         Guard.ThrowIfArgumentIsNullOrEmpty(name);
 
+        Type foundType = null;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith("Expected assembly to define type {0}.{1}{reason}, but {context:assembly} is <null>.",
-                @namespace, name);
+                @namespace, name)
+            .Then
+            .ForCondition(() =>
+            {
+                foundType = Subject.GetTypes().SingleOrDefault(t => t.Namespace == @namespace && t.Name == name);
 
-        Type foundType = null;
-
-        if (assertionChain.Succeeded)
-        {
-            foundType = Subject!.GetTypes().SingleOrDefault(t => t.Namespace == @namespace && t.Name == name);
-
-            assertionChain
-                .ForCondition(foundType is not null)
-                .BecauseOf(because, becauseArgs)
-                .FailWith("Expected assembly {0} to define type {1}.{2}{reason}, but it does not.",
-                    Subject.FullName, @namespace, name);
-        }
+                return foundType is not null;
+            })
+            .BecauseOf(because, becauseArgs)
+            .FailWith("Expected assembly {0} to define type {1}.{2}{reason}, but it does not.",
+                Subject.FullName, @namespace, name);
 
         return new AndWhichConstraint<AssemblyAssertions, Type>(this, foundType);
     }
@@ -162,16 +163,12 @@ public class AssemblyAssertions : ReferenceTypeAssertions<Assembly, AssemblyAsse
     {
         assertionChain
             .ForCondition(Subject is not null)
-            .FailWith("Can't check for assembly signing if {context:assembly} reference is <null>.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
+            .FailWith("Can't check for assembly signing if {context:assembly} reference is <null>.")
+            .Then
                 .BecauseOf(because, becauseArgs)
-                .ForCondition(Subject!.GetName().GetPublicKey() is not { Length: > 0 })
+                .ForCondition(() => Subject.GetName().GetPublicKey() is not { Length: > 0 })
                 .FailWith(
                     "Did not expect the assembly {0} to be signed{reason}, but it is.", Subject.FullName);
-        }
 
         return new AndConstraint<AssemblyAssertions>(this);
     }
