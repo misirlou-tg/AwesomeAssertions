@@ -101,25 +101,24 @@ public sealed class ParameterInfoAssertions : ReferenceTypeAssertions<ParameterI
     private IEnumerable<TAttribute> AssertDecoratedWith<TAttribute>(string because, object[] becauseArgs)
         where TAttribute : Attribute
     {
+        IEnumerable<TAttribute> attributes = [];
+
         assertionChain
                     .BecauseOf(because, becauseArgs)
                     .ForCondition(Subject is not null)
                     .FailWith(
                         "Expected parameter to be decorated with {0}{reason}" +
-                        ", but found {context:parameter} is <null>.", typeof(TAttribute));
+                        ", but found {context:parameter} is <null>.", typeof(TAttribute))
+                    .Then
+                    .ForCondition(() =>
+                    {
+                        attributes = Subject.GetCustomAttributes<TAttribute>();
 
-        IEnumerable<TAttribute> attributes = [];
-
-        if (assertionChain.Succeeded)
-        {
-            attributes = Subject.GetCustomAttributes<TAttribute>();
-
-            assertionChain
-                .ForCondition(attributes.Any())
-                .FailWith(() => new FailReason(
-                    $"Expected {SubjectDescription} to be decorated with {{0}}{{reason}}" +
-                    ", but that attribute was not found.", typeof(TAttribute)));
-        }
+                        return attributes.Any();
+                    })
+                    .FailWith(() => new FailReason(
+                        $"Expected {SubjectDescription} to be decorated with {{0}}{{reason}}" +
+                        ", but that attribute was not found.", typeof(TAttribute)));
 
         return attributes;
     }
@@ -145,18 +144,17 @@ public sealed class ParameterInfoAssertions : ReferenceTypeAssertions<ParameterI
            .ForCondition(Subject is not null)
            .FailWith(
                "Did not expect parameter to be decorated with {0}{reason}" +
-               ", but found {context:parameter} is <null>.", typeof(TAttribute));
+               ", but found {context:parameter} is <null>.", typeof(TAttribute))
+            .Then
+            .ForCondition(() =>
+            {
+                IEnumerable<TAttribute> attributes = Subject.GetCustomAttributes<TAttribute>();
 
-        if (assertionChain.Succeeded)
-        {
-            IEnumerable<TAttribute> attributes = Subject.GetCustomAttributes<TAttribute>();
-
-            assertionChain
-                .ForCondition(!attributes.Any())
-                .FailWith(() => new FailReason(
-                    $"Did not expect {SubjectDescription} to be decorated with {{0}}{{reason}}" +
-                    ", but that attribute was found.", typeof(TAttribute)));
-        }
+                return !attributes.Any();
+            })
+            .FailWith(() => new FailReason(
+                $"Did not expect {SubjectDescription} to be decorated with {{0}}{{reason}}" +
+                ", but that attribute was found.", typeof(TAttribute)));
 
         return new(this);
     }
@@ -190,19 +188,18 @@ public sealed class ParameterInfoAssertions : ReferenceTypeAssertions<ParameterI
             .ForCondition(Subject is not null)
             .FailWith(
                 "Did not expect parameter to be decorated with {0}{reason}" +
-                ", but found {context:parameter} is <null>.", typeof(TAttribute));
+                ", but found {context:parameter} is <null>.", typeof(TAttribute))
+            .Then
+            .ForCondition(() =>
+            {
+                IEnumerable<TAttribute> attributes = Subject.GetCustomAttributes<TAttribute>()
+                    .Where(isMatchingAttributePredicate.Compile()).ToArray();
 
-        if (assertionChain.Succeeded)
-        {
-            IEnumerable<TAttribute> attributes = Subject.GetCustomAttributes<TAttribute>()
-                .Where(isMatchingAttributePredicate.Compile()).ToArray();
-
-            assertionChain
-                .ForCondition(!attributes.Any())
-                .FailWith(() => new FailReason(
-                    $"Did not expect {SubjectDescription} to be decorated with {{0}} matching {{1}}{{reason}}" +
-                    ", but that attribute was found.", typeof(TAttribute), isMatchingAttributePredicate.Body));
-        }
+                return !attributes.Any();
+            })
+            .FailWith(() => new FailReason(
+                $"Did not expect {SubjectDescription} to be decorated with {{0}} matching {{1}}{{reason}}" +
+                ", but that attribute was found.", typeof(TAttribute), isMatchingAttributePredicate.Body));
 
         return new(this);
     }
