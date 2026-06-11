@@ -51,25 +51,27 @@ public abstract class MethodBaseAssertions<TSubject, TAssertions> : MemberInfoAs
     {
         Guard.ThrowIfArgumentIsOutOfRange(accessModifier);
 
+        CSharpAccessModifier subjectAccessModifier = default;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith($"Expected method to be {accessModifier}{{reason}}, but {{context:method}} is <null>.");
+            .FailWith($"Expected method to be {accessModifier}{{reason}}, but {{context:method}} is <null>.")
+            .Then
+            .ForCondition(() =>
+            {
+                subjectAccessModifier = Subject.GetCSharpAccessModifier();
 
-        if (assertionChain.Succeeded)
-        {
-            CSharpAccessModifier subjectAccessModifier = Subject.GetCSharpAccessModifier();
+                return accessModifier == subjectAccessModifier;
+            })
+            .BecauseOf(because, becauseArgs)
+            .FailWith(() =>
+            {
+                string subject = GetSubjectDescription();
 
-            assertionChain
-                .ForCondition(accessModifier == subjectAccessModifier)
-                .BecauseOf(because, becauseArgs)
-                .FailWith(() =>
-                {
-                    string subject = GetSubjectDescription();
-                    return new FailReason(
-                        $"Expected {subject} to be {accessModifier}{{reason}}, but it is {subjectAccessModifier}.");
-                });
-        }
+                return new FailReason(
+                    $"Expected {subject} to be {accessModifier}{{reason}}, but it is {subjectAccessModifier}.");
+            });
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -96,21 +98,21 @@ public abstract class MethodBaseAssertions<TSubject, TAssertions> : MemberInfoAs
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith($"Expected method not to be {accessModifier}{{reason}}, but {{context:member}} is <null>.");
+            .FailWith($"Expected method not to be {accessModifier}{{reason}}, but {{context:member}} is <null>.")
+            .Then
+            .ForCondition(() =>
+            {
+                CSharpAccessModifier subjectAccessModifier = Subject.GetCSharpAccessModifier();
 
-        if (assertionChain.Succeeded)
-        {
-            CSharpAccessModifier subjectAccessModifier = Subject.GetCSharpAccessModifier();
+                return accessModifier != subjectAccessModifier;
+            })
+            .BecauseOf(because, becauseArgs)
+            .FailWith(() =>
+            {
+                string subject = GetSubjectDescription();
 
-            assertionChain
-                .ForCondition(accessModifier != subjectAccessModifier)
-                .BecauseOf(because, becauseArgs)
-                .FailWith(() =>
-                {
-                    string subject = GetSubjectDescription();
-                    return new FailReason($"Expected {subject} not to be {accessModifier}{{reason}}, but it is.");
-                });
-        }
+                return new FailReason($"Expected {subject} not to be {accessModifier}{{reason}}, but it is.");
+            });
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
