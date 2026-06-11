@@ -67,15 +67,11 @@ public class StreamAssertions<TSubject, TAssertions> : ReferenceTypeAssertions<T
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:stream} to be writable{reason}, but found a <null> reference.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(Subject!.CanWrite)
-                .FailWith("Expected {context:stream} to be writable{reason}, but it was not.");
-        }
+            .FailWith("Expected {context:stream} to be writable{reason}, but found a <null> reference.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() => Subject.CanWrite)
+            .FailWith("Expected {context:stream} to be writable{reason}, but it was not.");
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -96,15 +92,11 @@ public class StreamAssertions<TSubject, TAssertions> : ReferenceTypeAssertions<T
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:stream} not to be writable{reason}, but found a <null> reference.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(!Subject!.CanWrite)
-                .FailWith("Expected {context:stream} not to be writable{reason}, but it was.");
-        }
+            .FailWith("Expected {context:stream} not to be writable{reason}, but found a <null> reference.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() => !Subject.CanWrite)
+            .FailWith("Expected {context:stream} not to be writable{reason}, but it was.");
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -125,15 +117,11 @@ public class StreamAssertions<TSubject, TAssertions> : ReferenceTypeAssertions<T
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:stream} to be seekable{reason}, but found a <null> reference.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(Subject!.CanSeek)
-                .FailWith("Expected {context:stream} to be seekable{reason}, but it was not.");
-        }
+            .FailWith("Expected {context:stream} to be seekable{reason}, but found a <null> reference.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() => Subject.CanSeek)
+            .FailWith("Expected {context:stream} to be seekable{reason}, but it was not.");
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -154,15 +142,11 @@ public class StreamAssertions<TSubject, TAssertions> : ReferenceTypeAssertions<T
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:stream} not to be seekable{reason}, but found a <null> reference.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(!Subject!.CanSeek)
-                .FailWith("Expected {context:stream} not to be seekable{reason}, but it was.");
-        }
+            .FailWith("Expected {context:stream} not to be seekable{reason}, but found a <null> reference.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() => !Subject.CanSeek)
+            .FailWith("Expected {context:stream} not to be seekable{reason}, but it was.");
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -183,15 +167,11 @@ public class StreamAssertions<TSubject, TAssertions> : ReferenceTypeAssertions<T
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:stream} to be readable{reason}, but found a <null> reference.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(Subject!.CanRead)
-                .FailWith("Expected {context:stream} to be readable{reason}, but it was not.");
-        }
+            .FailWith("Expected {context:stream} to be readable{reason}, but found a <null> reference.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() => Subject.CanRead)
+            .FailWith("Expected {context:stream} to be readable{reason}, but it was not.");
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -212,15 +192,11 @@ public class StreamAssertions<TSubject, TAssertions> : ReferenceTypeAssertions<T
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:stream} not to be readable{reason}, but found a <null> reference.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(!Subject!.CanRead)
-                .FailWith("Expected {context:stream} not to be readable{reason}, but it was.");
-        }
+            .FailWith("Expected {context:stream} not to be readable{reason}, but found a <null> reference.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() => !Subject.CanRead)
+            .FailWith("Expected {context:stream} not to be readable{reason}, but it was.");
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -445,15 +421,11 @@ public class StreamAssertions<TSubject, TAssertions> : ReferenceTypeAssertions<T
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:stream} to be read-only{reason}, but found a <null> reference.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(!Subject!.CanWrite && Subject.CanRead)
-                .FailWith("Expected {context:stream} to be read-only{reason}, but it was writable or not readable.");
-        }
+            .FailWith("Expected {context:stream} to be read-only{reason}, but found a <null> reference.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() => !Subject.CanWrite && Subject.CanRead)
+            .FailWith("Expected {context:stream} to be read-only{reason}, but it was writable or not readable.");
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -474,15 +446,11 @@ public class StreamAssertions<TSubject, TAssertions> : ReferenceTypeAssertions<T
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:stream} not to be read-only{reason}, but found a <null> reference.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(Subject!.CanWrite || !Subject.CanRead)
-                .FailWith("Expected {context:stream} not to be read-only{reason}, but it was.");
-        }
+            .FailWith("Expected {context:stream} not to be read-only{reason}, but found a <null> reference.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() => Subject.CanWrite || !Subject.CanRead)
+            .FailWith("Expected {context:stream} not to be read-only{reason}, but it was.");
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -503,15 +471,11 @@ public class StreamAssertions<TSubject, TAssertions> : ReferenceTypeAssertions<T
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:stream} to be write-only{reason}, but found a <null> reference.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(Subject!.CanWrite && !Subject.CanRead)
-                .FailWith("Expected {context:stream} to be write-only{reason}, but it was readable or not writable.");
-        }
+            .FailWith("Expected {context:stream} to be write-only{reason}, but found a <null> reference.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() => Subject.CanWrite && !Subject.CanRead)
+            .FailWith("Expected {context:stream} to be write-only{reason}, but it was readable or not writable.");
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -532,15 +496,11 @@ public class StreamAssertions<TSubject, TAssertions> : ReferenceTypeAssertions<T
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:stream} not to be write-only{reason}, but found a <null> reference.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
+            .FailWith("Expected {context:stream} not to be write-only{reason}, but found a <null> reference.")
+            .Then
                 .BecauseOf(because, becauseArgs)
-                .ForCondition(!Subject!.CanWrite || Subject.CanRead)
+                .ForCondition(() => !Subject.CanWrite || Subject.CanRead)
                 .FailWith("Expected {context:stream} not to be write-only{reason}, but it was.");
-        }
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
