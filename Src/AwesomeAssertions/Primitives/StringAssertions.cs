@@ -936,16 +936,12 @@ public class StringAssertions<TAssertions> : ReferenceTypeAssertions<string, TAs
             .ForCondition(Subject is not null)
             .UsingLineBreaks
             .BecauseOf(because, becauseArgs)
-            .FailWith("Expected {context:string} to match regex {0}{reason}, but it was <null>.", regexStr);
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .ForCondition(regularExpression.IsMatch(Subject!))
-                .BecauseOf(because, becauseArgs)
-                .UsingLineBreaks
-                .FailWith("Expected {context:string} to match regex {0}{reason}, but {1} does not match.", regexStr, Subject);
-        }
+            .FailWith("Expected {context:string} to match regex {0}{reason}, but it was <null>.", regexStr)
+            .Then
+            .ForCondition(() => regularExpression.IsMatch(Subject))
+            .BecauseOf(because, becauseArgs)
+            .UsingLineBreaks
+            .FailWith("Expected {context:string} to match regex {0}{reason}, but {1} does not match.", regexStr, Subject);
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -1021,16 +1017,12 @@ public class StringAssertions<TAssertions> : ReferenceTypeAssertions<string, TAs
             .ForCondition(Subject is not null)
             .UsingLineBreaks
             .BecauseOf(because, becauseArgs)
-            .FailWith("Expected {context:string} to not match regex {0}{reason}, but it was <null>.", regexStr);
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .ForCondition(!regularExpression.IsMatch(Subject!))
-                .BecauseOf(because, becauseArgs)
-                .UsingLineBreaks
-                .FailWith("Did not expect {context:string} to match regex {0}{reason}, but {1} matches.", regexStr, Subject);
-        }
+            .FailWith("Expected {context:string} to not match regex {0}{reason}, but it was <null>.", regexStr)
+            .Then
+            .ForCondition(() => !regularExpression.IsMatch(Subject))
+            .BecauseOf(because, becauseArgs)
+            .UsingLineBreaks
+            .FailWith("Did not expect {context:string} to match regex {0}{reason}, but {1} matches.", regexStr, Subject);
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -2014,16 +2006,12 @@ public class StringAssertions<TAssertions> : ReferenceTypeAssertions<string, TAs
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:string} with length {0}{reason}, but found <null>.", expected);
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(Subject!.Length == expected)
-                .FailWith("Expected {context:string} with length {0}{reason}, but found string {1} with length {2}.",
-                    expected, Subject, Subject.Length);
-        }
+            .FailWith("Expected {context:string} with length {0}{reason}, but found <null>.", expected)
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() => Subject.Length == expected)
+            .FailWith("Expected {context:string} with length {0}{reason}, but found string {1} with length {2}.",
+                expected, Subject, Subject.Length);
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
