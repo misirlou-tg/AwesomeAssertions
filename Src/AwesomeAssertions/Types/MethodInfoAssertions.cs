@@ -43,16 +43,12 @@ public class MethodInfoAssertions : MethodBaseAssertions<MethodInfo, MethodInfoA
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected method to be virtual{reason}, but {context:member} is <null>.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .ForCondition(!Subject.IsNonVirtual())
-                .BecauseOf(because, becauseArgs)
-                .FailWith(() => new FailReason(
-                    $"Expected method {SubjectDescription} to be virtual{{reason}}, but it is not virtual."));
-        }
+            .FailWith("Expected method to be virtual{reason}, but {context:member} is <null>.")
+            .Then
+            .ForCondition(() => !Subject.IsNonVirtual())
+            .BecauseOf(because, becauseArgs)
+            .FailWith(() => new FailReason(
+                $"Expected method {SubjectDescription} to be virtual{{reason}}, but it is not virtual."));
 
         return new AndConstraint<MethodInfoAssertions>(this);
     }
@@ -73,16 +69,12 @@ public class MethodInfoAssertions : MethodBaseAssertions<MethodInfo, MethodInfoA
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected method not to be virtual{reason}, but {context:member} is <null>.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .ForCondition(Subject.IsNonVirtual())
-                .BecauseOf(because, becauseArgs)
-                .FailWith(() => new FailReason(
-                    $"Expected method {SubjectDescription} not to be virtual{{reason}}, but it is."));
-        }
+            .FailWith("Expected method not to be virtual{reason}, but {context:member} is <null>.")
+            .Then
+            .ForCondition(() => Subject.IsNonVirtual())
+            .BecauseOf(because, becauseArgs)
+            .FailWith(() => new FailReason(
+                $"Expected method {SubjectDescription} not to be virtual{{reason}}, but it is."));
 
         return new AndConstraint<MethodInfoAssertions>(this);
     }
@@ -103,16 +95,12 @@ public class MethodInfoAssertions : MethodBaseAssertions<MethodInfo, MethodInfoA
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected method to be async{reason}, but {context:member} is <null>.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .ForCondition(Subject.IsAsync())
-                .BecauseOf(because, becauseArgs)
-                .FailWith(() => new FailReason(
-                    $"Expected method {SubjectDescription} to be async{{reason}}, but it is not."));
-        }
+            .FailWith("Expected method to be async{reason}, but {context:member} is <null>.")
+            .Then
+            .ForCondition(() => Subject.IsAsync())
+            .BecauseOf(because, becauseArgs)
+            .FailWith(() => new FailReason(
+                $"Expected method {SubjectDescription} to be async{{reason}}, but it is not."));
 
         return new AndConstraint<MethodInfoAssertions>(this);
     }
@@ -133,16 +121,12 @@ public class MethodInfoAssertions : MethodBaseAssertions<MethodInfo, MethodInfoA
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected method not to be async{reason}, but {context:member} is <null>.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .ForCondition(!Subject.IsAsync())
-                .BecauseOf(because, becauseArgs)
-                .FailWith(() => new FailReason(
-                    $"Expected method {SubjectDescription} not to be async{{reason}}, but it is."));
-        }
+            .FailWith("Expected method not to be async{reason}, but {context:member} is <null>.")
+            .Then
+            .ForCondition(() => !Subject.IsAsync())
+            .BecauseOf(because, becauseArgs)
+            .FailWith(() => new FailReason(
+                $"Expected method {SubjectDescription} not to be async{{reason}}, but it is."));
 
         return new AndConstraint<MethodInfoAssertions>(this);
     }
@@ -164,16 +148,12 @@ public class MethodInfoAssertions : MethodBaseAssertions<MethodInfo, MethodInfoA
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected the return type of method to be void{reason}, but {context:member} is <null>.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .ForCondition(typeof(void) == Subject!.ReturnType)
-                .BecauseOf(because, becauseArgs)
-                .FailWith($"Expected the return type of method {Subject.Name} to be void{{reason}}, but it is {{0}}.",
-                    Subject.ReturnType);
-        }
+            .FailWith("Expected the return type of method to be void{reason}, but {context:member} is <null>.")
+            .Then
+            .ForCondition(() => typeof(void) == Subject.ReturnType)
+            .BecauseOf(because, becauseArgs)
+            .FailWith($"Expected the return type of method {Subject.Name} to be void{{reason}}, but it is {{0}}.",
+                Subject.ReturnType);
 
         return new AndConstraint<MethodBaseAssertions<MethodInfo, MethodInfoAssertions>>(this);
     }
@@ -199,16 +179,12 @@ public class MethodInfoAssertions : MethodBaseAssertions<MethodInfo, MethodInfoA
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected the return type of method to be {0}{reason}, but {context:member} is <null>.", returnType);
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .ForCondition(returnType == Subject!.ReturnType)
-                .BecauseOf(because, becauseArgs)
-                .FailWith($"Expected the return type of method {Subject.Name} to be {{0}}{{reason}}, but it is {{1}}.",
-                    returnType, Subject.ReturnType);
-        }
+            .FailWith("Expected the return type of method to be {0}{reason}, but {context:member} is <null>.", returnType)
+            .Then
+            .ForCondition(() => returnType == Subject.ReturnType)
+            .BecauseOf(because, becauseArgs)
+            .FailWith($"Expected the return type of method {Subject.Name} to be {{0}}{{reason}}, but it is {{1}}.",
+                returnType, Subject.ReturnType);
 
         return new AndConstraint<MethodBaseAssertions<MethodInfo, MethodInfoAssertions>>(this);
     }
@@ -248,15 +224,11 @@ public class MethodInfoAssertions : MethodBaseAssertions<MethodInfo, MethodInfoA
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected the return type of method not to be void{reason}, but {context:member} is <null>.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .ForCondition(typeof(void) != Subject!.ReturnType)
-                .BecauseOf(because, becauseArgs)
-                .FailWith("Expected the return type of method " + Subject.Name + " not to be void{reason}, but it is.");
-        }
+            .FailWith("Expected the return type of method not to be void{reason}, but {context:member} is <null>.")
+            .Then
+            .ForCondition(() => typeof(void) != Subject.ReturnType)
+            .BecauseOf(because, becauseArgs)
+            .FailWith("Expected the return type of method " + Subject.Name + " not to be void{reason}, but it is.");
 
         return new AndConstraint<MethodBaseAssertions<MethodInfo, MethodInfoAssertions>>(this);
     }
@@ -283,16 +255,12 @@ public class MethodInfoAssertions : MethodBaseAssertions<MethodInfo, MethodInfoA
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith(
-                "Expected the return type of method not to be {0}{reason}, but {context:member} is <null>.", returnType);
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .ForCondition(returnType != Subject!.ReturnType)
-                .BecauseOf(because, becauseArgs)
-                .FailWith(
-                    "Expected the return type of method " + Subject.Name + " not to be {0}{reason}, but it is.", returnType);
-        }
+                "Expected the return type of method not to be {0}{reason}, but {context:member} is <null>.", returnType)
+            .Then
+            .ForCondition(() => returnType != Subject.ReturnType)
+            .BecauseOf(because, becauseArgs)
+            .FailWith(
+                "Expected the return type of method " + Subject.Name + " not to be {0}{reason}, but it is.", returnType);
 
         return new AndConstraint<MethodBaseAssertions<MethodInfo, MethodInfoAssertions>>(this);
     }
