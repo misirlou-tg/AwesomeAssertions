@@ -91,26 +91,25 @@ public abstract class MemberInfoAssertions<TSubject, TAssertions> : ReferenceTyp
     {
         Guard.ThrowIfArgumentIsNull(isMatchingAttributePredicate);
 
+        IEnumerable<TAttribute> attributes = [];
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith(
                 $"Expected {Identifier} to be decorated with {{0}}{{reason}}" +
-                ", but {context:member} is <null>.", typeof(TAttribute));
+                ", but {context:member} is <null>.", typeof(TAttribute))
+            .Then
+            .ForCondition(() =>
+            {
+                attributes = Subject.GetMatchingAttributes(isMatchingAttributePredicate);
 
-        IEnumerable<TAttribute> attributes = [];
-
-        if (assertionChain.Succeeded)
-        {
-            attributes = Subject.GetMatchingAttributes(isMatchingAttributePredicate);
-
-            assertionChain
-                .ForCondition(attributes.Any())
-                .BecauseOf(because, becauseArgs)
-                .FailWith(() => new FailReason(
-                    $"Expected {Identifier} {SubjectDescription} to be decorated with {{0}}{{reason}}" +
-                    ", but that attribute was not found.", typeof(TAttribute)));
-        }
+                return attributes.Any();
+            })
+            .BecauseOf(because, becauseArgs)
+            .FailWith(() => new FailReason(
+                $"Expected {Identifier} {SubjectDescription} to be decorated with {{0}}{{reason}}" +
+                ", but that attribute was not found.", typeof(TAttribute)));
 
         return new AndWhichConstraint<MemberInfoAssertions<TSubject, TAssertions>, TAttribute>(this, attributes);
     }
@@ -143,19 +142,18 @@ public abstract class MemberInfoAssertions<TSubject, TAssertions> : ReferenceTyp
             .ForCondition(Subject is not null)
             .FailWith(
                 $"Expected {Identifier} to not be decorated with {{0}}{{reason}}" +
-                ", but {context:member} is <null>.", typeof(TAttribute));
+                ", but {context:member} is <null>.", typeof(TAttribute))
+            .Then
+            .ForCondition(() =>
+            {
+                IEnumerable<TAttribute> attributes = Subject.GetMatchingAttributes(isMatchingAttributePredicate);
 
-        if (assertionChain.Succeeded)
-        {
-            IEnumerable<TAttribute> attributes = Subject.GetMatchingAttributes(isMatchingAttributePredicate);
-
-            assertionChain
-                .ForCondition(!attributes.Any())
-                .BecauseOf(because, becauseArgs)
-                .FailWith(() => new FailReason(
-                    $"Expected {Identifier} {SubjectDescription} to not be decorated with {{0}}{{reason}}" +
-                    ", but that attribute was found.", typeof(TAttribute)));
-        }
+                return !attributes.Any();
+            })
+            .BecauseOf(because, becauseArgs)
+            .FailWith(() => new FailReason(
+                $"Expected {Identifier} {SubjectDescription} to not be decorated with {{0}}{{reason}}" +
+                ", but that attribute was found.", typeof(TAttribute)));
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
