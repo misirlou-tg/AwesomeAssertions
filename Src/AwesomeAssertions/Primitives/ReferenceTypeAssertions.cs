@@ -278,16 +278,12 @@ public abstract class ReferenceTypeAssertions<TSubject, TAssertions>
             .ForCondition(Subject is not null)
             .BecauseOf(because, becauseArgs)
             .WithDefaultIdentifier("type")
-            .FailWith("Expected {context} to be assignable to {0}{reason}, but found <null>.", typeof(T));
-
-        if (CurrentAssertionChain.Succeeded)
-        {
-            CurrentAssertionChain
-                .ForCondition(Subject is T)
-                .BecauseOf(because, becauseArgs)
-                .WithDefaultIdentifier(Identifier)
-                .FailWith("Expected {context} to be assignable to {0}{reason}, but {1} is not.", typeof(T), Subject.GetType());
-        }
+            .FailWith("Expected {context} to be assignable to {0}{reason}, but found <null>.", typeof(T))
+            .Then
+            .ForCondition(() => Subject is T)
+            .BecauseOf(because, becauseArgs)
+            .WithDefaultIdentifier(Identifier)
+            .FailWith("Expected {context} to be assignable to {0}{reason}, but {1} is not.", typeof(T), Subject.GetType());
 
         T typedSubject = Subject is T type
             ? type
@@ -319,22 +315,21 @@ public abstract class ReferenceTypeAssertions<TSubject, TAssertions>
             .ForCondition(Subject is not null)
             .BecauseOf(because, becauseArgs)
             .WithDefaultIdentifier("type")
-            .FailWith("Expected {context} to be assignable to {0}{reason}, but found <null>.", type);
+            .FailWith("Expected {context} to be assignable to {0}{reason}, but found <null>.", type)
+            .Then
+            .ForCondition(() =>
+            {
+                bool isAssignable = type.IsGenericTypeDefinition
+                    ? Subject.GetType().IsAssignableToOpenGeneric(type)
+                    : type.IsAssignableFrom(Subject.GetType());
 
-        if (CurrentAssertionChain.Succeeded)
-        {
-            bool isAssignable = type.IsGenericTypeDefinition
-                ? Subject.GetType().IsAssignableToOpenGeneric(type)
-                : type.IsAssignableFrom(Subject.GetType());
-
-            CurrentAssertionChain
-                .ForCondition(isAssignable)
-                .BecauseOf(because, becauseArgs)
-                .WithDefaultIdentifier(Identifier)
-                .FailWith("Expected {context} to be assignable to {0}{reason}, but {1} is not.",
-                    type,
-                    Subject.GetType());
-        }
+                return isAssignable;
+            })
+            .BecauseOf(because, becauseArgs)
+            .WithDefaultIdentifier(Identifier)
+            .FailWith("Expected {context} to be assignable to {0}{reason}, but {1} is not.",
+                type,
+                Subject.GetType());
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -381,20 +376,19 @@ public abstract class ReferenceTypeAssertions<TSubject, TAssertions>
             .ForCondition(Subject is not null)
             .BecauseOf(because, becauseArgs)
             .WithDefaultIdentifier("type")
-            .FailWith("Expected {context} to not be assignable to {0}{reason}, but found <null>.", type);
+            .FailWith("Expected {context} to not be assignable to {0}{reason}, but found <null>.", type)
+            .Then
+            .ForCondition(() =>
+            {
+                bool isAssignable = type.IsGenericTypeDefinition
+                    ? Subject.GetType().IsAssignableToOpenGeneric(type)
+                    : type.IsAssignableFrom(Subject.GetType());
 
-        if (CurrentAssertionChain.Succeeded)
-        {
-            bool isAssignable = type.IsGenericTypeDefinition
-                ? Subject.GetType().IsAssignableToOpenGeneric(type)
-                : type.IsAssignableFrom(Subject.GetType());
-
-            CurrentAssertionChain
-                .ForCondition(!isAssignable)
-                .BecauseOf(because, becauseArgs)
-                .WithDefaultIdentifier(Identifier)
-                .FailWith("Expected {context} to not be assignable to {0}{reason}, but {1} is.", type, Subject.GetType());
-        }
+                return !isAssignable;
+            })
+            .BecauseOf(because, becauseArgs)
+            .WithDefaultIdentifier(Identifier)
+            .FailWith("Expected {context} to not be assignable to {0}{reason}, but {1} is.", type, Subject.GetType());
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
