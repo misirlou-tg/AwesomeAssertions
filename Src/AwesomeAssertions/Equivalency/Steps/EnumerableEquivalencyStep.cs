@@ -39,14 +39,10 @@ public class EnumerableEquivalencyStep : IEquivalencyStep
     {
         assertionChain
             .ForCondition(subject is not null)
-            .FailWith("Expected a collection, but {context:Subject} is <null>.");
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .ForCondition(IsCollection(subject!.GetType()))
-                .FailWith("Expected a collection, but {context:Subject} is of a non-collection type.");
-        }
+            .FailWith("Expected a collection, but {context:Subject} is <null>.")
+            .Then
+            .ForCondition(() => IsCollection(subject.GetType()))
+            .FailWith("Expected a collection, but {context:Subject} is of a non-collection type.");
 
         return assertionChain.Succeeded;
     }
