@@ -84,24 +84,25 @@ public class DateTimeOffsetRangeAssertions<TAssertions>
     public AndConstraint<TAssertions> Before(DateTimeOffset target,
         [StringSyntax("CompositeFormat")] string because = "", params object[] becauseArgs)
     {
+        TimeSpan actual = default;
+
         CurrentAssertionChain
             .ForCondition(subject.HasValue)
             .BecauseOf(because, becauseArgs)
             .FailWith("Expected {context:the date and time} to be " + predicate.DisplayText +
-                " {0} before {1}{reason}, but found a <null> DateTime.", timeSpan, target);
+                " {0} before {1}{reason}, but found a <null> DateTime.", timeSpan, target)
+            .Then
+            .ForCondition(() =>
+            {
+                actual = target - subject.Value;
 
-        if (CurrentAssertionChain.Succeeded)
-        {
-            TimeSpan actual = target - subject.Value;
-
-            CurrentAssertionChain
-                .ForCondition(predicate.IsMatchedBy(actual, timeSpan))
-                .BecauseOf(because, becauseArgs)
-                .FailWith(
-                    "Expected {context:the date and time} {0} to be " + predicate.DisplayText +
-                    " {1} before {2}{reason}, but it is " + PositionRelativeToTarget(subject.Value, target) + " by {3}.",
-                    subject, timeSpan, target, actual.Duration());
-        }
+                return predicate.IsMatchedBy(actual, timeSpan);
+            })
+            .BecauseOf(because, becauseArgs)
+            .FailWith(
+                "Expected {context:the date and time} {0} to be " + predicate.DisplayText +
+                " {1} before {2}{reason}, but it is " + PositionRelativeToTarget(subject.Value, target) + " by {3}.",
+                subject, timeSpan, target, actual.Duration());
 
         return new AndConstraint<TAssertions>(parentAssertions);
     }
@@ -123,24 +124,25 @@ public class DateTimeOffsetRangeAssertions<TAssertions>
     public AndConstraint<TAssertions> After(DateTimeOffset target,
         [StringSyntax("CompositeFormat")] string because = "", params object[] becauseArgs)
     {
+        TimeSpan actual = default;
+
         CurrentAssertionChain
             .ForCondition(subject.HasValue)
             .BecauseOf(because, becauseArgs)
             .FailWith("Expected {context:the date and time} to be " + predicate.DisplayText +
-                " {0} after {1}{reason}, but found a <null> DateTime.", timeSpan, target);
+                " {0} after {1}{reason}, but found a <null> DateTime.", timeSpan, target)
+            .Then
+            .ForCondition(() =>
+            {
+                actual = subject.Value - target;
 
-        if (CurrentAssertionChain.Succeeded)
-        {
-            TimeSpan actual = subject.Value - target;
-
-            CurrentAssertionChain
-                .ForCondition(predicate.IsMatchedBy(actual, timeSpan))
-                .BecauseOf(because, becauseArgs)
-                .FailWith(
-                    "Expected {context:the date and time} {0} to be " + predicate.DisplayText +
-                    " {1} after {2}{reason}, but it is " + PositionRelativeToTarget(subject.Value, target) + " by {3}.",
-                    subject, timeSpan, target, actual.Duration());
-        }
+                return predicate.IsMatchedBy(actual, timeSpan);
+            })
+            .BecauseOf(because, becauseArgs)
+            .FailWith(
+                "Expected {context:the date and time} {0} to be " + predicate.DisplayText +
+                " {1} after {2}{reason}, but it is " + PositionRelativeToTarget(subject.Value, target) + " by {3}.",
+                subject, timeSpan, target, actual.Duration());
 
         return new AndConstraint<TAssertions>(parentAssertions);
     }
