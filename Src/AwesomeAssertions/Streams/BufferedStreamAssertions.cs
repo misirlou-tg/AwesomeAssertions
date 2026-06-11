@@ -67,16 +67,12 @@ public class BufferedStreamAssertions<TAssertions> : StreamAssertions<BufferedSt
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith("Expected the buffer size of {context:stream} to be {0}{reason}, but found a <null> reference.",
-                expected);
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(Subject!.BufferSize == expected)
-                .FailWith("Expected the buffer size of {context:stream} to be {0}{reason}, but it was {1}.",
-                    expected, Subject.BufferSize);
-        }
+                expected)
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() => Subject.BufferSize == expected)
+            .FailWith("Expected the buffer size of {context:stream} to be {0}{reason}, but it was {1}.",
+                expected, Subject.BufferSize);
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -100,16 +96,12 @@ public class BufferedStreamAssertions<TAssertions> : StreamAssertions<BufferedSt
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith("Expected the buffer size of {context:stream} not to be {0}{reason}, but found a <null> reference.",
+                unexpected)
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() => Subject.BufferSize != unexpected)
+            .FailWith("Expected the buffer size of {context:stream} not to be {0}{reason}, but it was.",
                 unexpected);
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(Subject!.BufferSize != unexpected)
-                .FailWith("Expected the buffer size of {context:stream} not to be {0}{reason}, but it was.",
-                    unexpected);
-        }
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
