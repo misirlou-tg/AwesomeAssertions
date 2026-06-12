@@ -88,16 +88,12 @@ public class XAttributeAssertions : ReferenceTypeAssertions<XAttribute, XAttribu
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected the attribute to have value {0}{reason}, but {context:member} is <null>.", expected);
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .ForCondition(Subject!.Value == expected)
-                .BecauseOf(because, becauseArgs)
-                .FailWith("Expected {context} \"{0}\" to have value {1}{reason}, but found {2}.",
-                    Subject.Name, expected, Subject.Value);
-        }
+            .FailWith("Expected the attribute to have value {0}{reason}, but {context:member} is <null>.", expected)
+            .Then
+            .ForCondition(() => Subject.Value == expected)
+            .BecauseOf(because, becauseArgs)
+            .FailWith("Expected {context} \"{0}\" to have value {1}{reason}, but found {2}.",
+                Subject.Name, expected, Subject.Value);
 
         return new AndConstraint<XAttributeAssertions>(this);
     }
