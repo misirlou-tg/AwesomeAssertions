@@ -757,24 +757,25 @@ public class GenericCollectionAssertions<TCollection, T, TAssertions> : Referenc
         T expected,
         [StringSyntax("CompositeFormat")] string because = "", params object[] becauseArgs)
     {
-        assertionChain
-            .BecauseOf(because, becauseArgs)
-            .ForCondition(Subject is not null)
-            .FailWith("Expected {context:collection} to contain {0}{reason}, but found <null>.", expected);
+        ICollection<T> collection = [];
 
         IEnumerable<T> matches = [];
 
-        if (assertionChain.Succeeded)
-        {
-            ICollection<T> collection = Subject.ConvertOrCastToCollection();
+        assertionChain
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(Subject is not null)
+            .FailWith("Expected {context:collection} to contain {0}{reason}, but found <null>.", expected)
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                collection = Subject.ConvertOrCastToCollection();
 
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(collection.Contains(expected))
-                .FailWith("Expected {context:collection} {0} to contain {1}{reason}.", collection, expected);
+                matches = collection.Where(item => EqualityComparer<T>.Default.Equals(item, expected));
 
-            matches = collection.Where(item => EqualityComparer<T>.Default.Equals(item, expected));
-        }
+                return collection.Contains(expected);
+            })
+            .FailWith("Expected {context:collection} {0} to contain {1}{reason}.", collection, expected);
 
         return new AndWhichConstraint<TAssertions, T>((TAssertions)this, matches);
     }
@@ -839,35 +840,34 @@ public class GenericCollectionAssertions<TCollection, T, TAssertions> : Referenc
     {
         Guard.ThrowIfArgumentIsNull(predicate);
 
-        assertionChain
-            .BecauseOf(because, becauseArgs)
-            .ForCondition(Subject is not null)
-            .FailWith("Expected {context:collection} to contain {0}{reason}, but found <null>.", predicate.Body);
-
         IEnumerable<T> matches = [];
 
         int? firstMatchingIndex = null;
 
-        if (assertionChain.Succeeded)
-        {
-            Func<T, bool> func = predicate.Compile();
-
-            foreach (var (item, index) in Subject!.Select((item, index) => (item, index)))
+        assertionChain
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(Subject is not null)
+            .FailWith("Expected {context:collection} to contain {0}{reason}, but found <null>.", predicate.Body)
+            .Then
+            .ForCondition(() =>
             {
-                if (func(item))
+                Func<T, bool> func = predicate.Compile();
+
+                foreach (var (item, index) in Subject.Select((item, index) => (item, index)))
                 {
-                    firstMatchingIndex = index;
-                    break;
+                    if (func(item))
+                    {
+                        firstMatchingIndex = index;
+                        break;
+                    }
                 }
-            }
 
-            assertionChain
-                .ForCondition(firstMatchingIndex.HasValue)
-                .BecauseOf(because, becauseArgs)
-                .FailWith("Expected {context:collection} {0} to have an item matching {1}{reason}.", Subject, predicate.Body);
+                matches = Subject.Where(func);
 
-            matches = Subject.Where(func);
-        }
+                return firstMatchingIndex.HasValue;
+            })
+            .BecauseOf(because, becauseArgs)
+            .FailWith("Expected {context:collection} {0} to have an item matching {1}{reason}.", Subject, predicate.Body);
 
         assertionChain.WithCallerPostfix($"[{firstMatchingIndex}]").ReuseOnce();
 
@@ -2455,22 +2455,23 @@ public class GenericCollectionAssertions<TCollection, T, TAssertions> : Referenc
     {
         Guard.ThrowIfArgumentIsNull(predicate);
 
+        IEnumerable<T> unexpectedItems = null;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:collection} not to contain {0}{reason}, but found <null>.", predicate.Body);
+            .FailWith("Expected {context:collection} not to contain {0}{reason}, but found <null>.", predicate.Body)
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                Func<T, bool> compiledPredicate = predicate.Compile();
+                unexpectedItems = Subject.Where(item => compiledPredicate(item));
 
-        if (assertionChain.Succeeded)
-        {
-            Func<T, bool> compiledPredicate = predicate.Compile();
-            IEnumerable<T> unexpectedItems = Subject!.Where(item => compiledPredicate(item));
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(!unexpectedItems.Any())
-                .FailWith("Expected {context:collection} {0} to not have any items matching {1}{reason}, but found {2}.",
-                    Subject, predicate, unexpectedItems);
-        }
+                return !unexpectedItems.Any();
+            })
+            .FailWith("Expected {context:collection} {0} to not have any items matching {1}{reason}, but found {2}.",
+                Subject, predicate, unexpectedItems);
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -2852,25 +2853,26 @@ public class GenericCollectionAssertions<TCollection, T, TAssertions> : Referenc
     {
         Guard.ThrowIfArgumentIsNull(predicate);
 
+        T[] values = [];
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith("Expected {context:collection} not to contain <null>s{reason}, but collection is <null>.");
+            .FailWith("Expected {context:collection} not to contain <null>s{reason}, but collection is <null>.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                Func<T, TKey> compiledPredicate = predicate.Compile();
 
-        if (assertionChain.Succeeded)
-        {
-            Func<T, TKey> compiledPredicate = predicate.Compile();
+                values = Subject
+                    .Where(e => compiledPredicate(e) is null)
+                    .ToArray();
 
-            T[] values = Subject!
-                .Where(e => compiledPredicate(e) is null)
-                .ToArray();
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(values.Length == 0)
-                .FailWith("Expected {context:collection} not to contain <null>s on {0}{reason}, but found {1}.",
-                    predicate.Body, values);
-        }
+                return values.Length == 0;
+            })
+            .FailWith("Expected {context:collection} not to contain <null>s on {0}{reason}, but found {1}.",
+                predicate.Body, values);
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
@@ -3916,32 +3918,33 @@ public class GenericCollectionAssertions<TCollection, T, TAssertions> : Referenc
     {
         string sortOrder = order == SortOrder.Ascending ? "ascending" : "descending";
 
+        IList<T> actualItems = [];
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith($"Did not expect {{context:collection}} to be in {sortOrder} order{{reason}}, but found <null>.");
+            .FailWith($"Did not expect {{context:collection}} to be in {sortOrder} order{{reason}}, but found <null>.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                actualItems = Subject.ConvertOrCastToList();
 
-        if (assertionChain.Succeeded)
-        {
-            IList<T> actualItems = Subject.ConvertOrCastToList();
+                T[] orderedItems = order == SortOrder.Ascending
+                    ? actualItems.OrderBy(item => item, comparer).ToArray()
+                    : actualItems.OrderByDescending(item => item, comparer).ToArray();
 
-            T[] orderedItems = order == SortOrder.Ascending
-                ? actualItems.OrderBy(item => item, comparer).ToArray()
-                : actualItems.OrderByDescending(item => item, comparer).ToArray();
+                Func<T, T, bool> areSameOrEqual = ObjectExtensions.GetComparer<T>();
 
-            Func<T, T, bool> areSameOrEqual = ObjectExtensions.GetComparer<T>();
+                bool itemsAreUnordered = actualItems
+                    .Where((actualItem, index) => !areSameOrEqual(actualItem, orderedItems[index]))
+                    .Any();
 
-            bool itemsAreUnordered = actualItems
-                .Where((actualItem, index) => !areSameOrEqual(actualItem, orderedItems[index]))
-                .Any();
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(itemsAreUnordered)
-                .FailWith(
-                    "Did not expect {context:collection} to be in " + sortOrder + " order{reason}, but found {0}.",
-                    actualItems);
-        }
+                return itemsAreUnordered;
+            })
+            .FailWith(
+                "Did not expect {context:collection} to be in " + sortOrder + " order{reason}, but found {0}.",
+                actualItems);
 
         return new AndConstraint<TAssertions>((TAssertions)this);
     }
