@@ -109,17 +109,13 @@ public class XmlElementAssertions : XmlNodeAssertions<XmlElement, XmlElementAsse
             .FailWith(
                 "Expected {context:subject} to have attribute {0}"
                 + " with value {1}{reason}, but found no such attribute in {2}",
-                expectedFormattedName, expectedValue, Subject);
-
-        if (assertionChain.Succeeded)
-        {
-            assertionChain
-                .ForCondition(attribute!.Value == expectedValue)
-                .BecauseOf(because, becauseArgs)
-                .FailWith(
-                    "Expected attribute {0} in {context:subject} to have value {1}{reason}, but found {2}.",
-                    expectedFormattedName, expectedValue, attribute.Value);
-        }
+                expectedFormattedName, expectedValue, Subject)
+            .Then
+            .ForCondition(() => attribute.Value == expectedValue)
+            .BecauseOf(because, becauseArgs)
+            .FailWith(
+                "Expected attribute {0} in {context:subject} to have value {1}{reason}, but found {2}.",
+                expectedFormattedName, expectedValue, attribute.Value);
 
         return new AndConstraint<XmlElementAssertions>(this);
     }
