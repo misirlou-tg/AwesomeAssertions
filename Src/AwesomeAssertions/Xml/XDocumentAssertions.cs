@@ -271,26 +271,25 @@ public class XDocumentAssertions : ReferenceTypeAssertions<XDocument, XDocumentA
         Guard.ThrowIfArgumentIsNull(expected, nameof(expected),
             "Cannot assert the document has an element if the expected name is <null>.");
 
+        XElement xElement = null;
+
         assertionChain
             .ForCondition(Subject.Root is not null)
             .BecauseOf(because, becauseArgs)
             .FailWith(
                 "Expected {context:subject} to have root element with child {0}{reason}, but it has no root element.",
+                expected.ToString())
+            .Then
+            .ForCondition(() =>
+            {
+                xElement = Subject.Root!.Element(expected);
+
+                return xElement is not null;
+            })
+            .BecauseOf(because, becauseArgs)
+            .FailWith(
+                "Expected {context:subject} to have root element with child {0}{reason}, but no such child element was found.",
                 expected.ToString());
-
-        XElement xElement = null;
-
-        if (assertionChain.Succeeded)
-        {
-            xElement = Subject.Root!.Element(expected);
-
-            assertionChain
-                .ForCondition(xElement is not null)
-                .BecauseOf(because, becauseArgs)
-                .FailWith(
-                    "Expected {context:subject} to have root element with child {0}{reason}, but no such child element was found.",
-                    expected.ToString());
-        }
 
         return new AndWhichConstraint<XDocumentAssertions, XElement>(this, xElement, assertionChain, "/" + expected);
     }
