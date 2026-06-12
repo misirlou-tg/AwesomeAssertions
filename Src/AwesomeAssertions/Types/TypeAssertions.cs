@@ -934,30 +934,29 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
     {
         Guard.ThrowIfArgumentIsNullOrEmpty(name);
 
+        PropertyInfo propertyInfo = null;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith(
-                $"Cannot determine if a type has a property named {name} if the type is <null>.");
+                $"Cannot determine if a type has a property named {name} if the type is <null>.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                propertyInfo = Subject.FindPropertyByName(name);
 
-        PropertyInfo propertyInfo = null;
+                return propertyInfo is not null;
+            })
+            .FailWith(() =>
+            {
+                string subjectDescription = assertionChain.HasOverriddenCallerIdentifier
+                    ? assertionChain.CallerIdentifier
+                    : Subject.ToFormattedString();
 
-        if (assertionChain.Succeeded)
-        {
-            propertyInfo = Subject.FindPropertyByName(name);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(propertyInfo is not null)
-                .FailWith(() =>
-                {
-                    string subjectDescription = assertionChain.HasOverriddenCallerIdentifier
-                        ? assertionChain.CallerIdentifier
-                        : Subject.ToFormattedString();
-
-                    return new FailReason($"Expected {subjectDescription} to have a property {name}{{reason}}, but it does not.");
-                });
-        }
+                return new FailReason($"Expected {subjectDescription} to have a property {name}{{reason}}, but it does not.");
+            });
 
         return new AndWhichConstraint<TypeAssertions, PropertyInfo>(this, propertyInfo);
     }
@@ -986,36 +985,35 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
         Guard.ThrowIfArgumentIsNull(propertyType);
         Guard.ThrowIfArgumentIsNullOrEmpty(name);
 
+        PropertyInfo propertyInfo = null;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith(
-                $"Cannot determine if a type has a property named {name} if the type is <null>.");
+                $"Cannot determine if a type has a property named {name} if the type is <null>.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                propertyInfo = Subject.FindPropertyByName(name);
 
-        PropertyInfo propertyInfo = null;
+                return propertyInfo is not null;
+            })
+            .FailWith(() =>
+            {
+                string subjectDescription = assertionChain.HasOverriddenCallerIdentifier
+                    ? assertionChain.CallerIdentifier
+                    : Subject.ToFormattedString();
 
-        if (assertionChain.Succeeded)
-        {
-            propertyInfo = Subject.FindPropertyByName(name);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(propertyInfo is not null)
-                .FailWith(() =>
-                {
-                    string subjectDescription = assertionChain.HasOverriddenCallerIdentifier
-                        ? assertionChain.CallerIdentifier
-                        : Subject.ToFormattedString();
-
-                    return new FailReason(
-                        $"Expected {subjectDescription} to have a property {name} of type {{0}}{{reason}}, but it does not.",
-                        propertyType);
-                })
-                .Then
-                .ForCondition(propertyInfo.PropertyType == propertyType)
-                .FailWith($"Expected property {propertyInfo.Name} to be of type {{0}}{{reason}}, but it is not.",
+                return new FailReason(
+                    $"Expected {subjectDescription} to have a property {name} of type {{0}}{{reason}}, but it does not.",
                     propertyType);
-        }
+            })
+            .Then
+            .ForCondition(() => propertyInfo.PropertyType == propertyType)
+            .FailWith($"Expected property {propertyInfo.Name} to be of type {{0}}{{reason}}, but it is not.",
+                propertyType);
 
         return new AndWhichConstraint<TypeAssertions, PropertyInfo>(this, propertyInfo);
     }
@@ -1061,28 +1059,29 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
     {
         Guard.ThrowIfArgumentIsNullOrEmpty(name);
 
+        PropertyInfo propertyInfo = null;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith($"Cannot determine if a type has an unexpected property named {name} if the type is <null>.");
+            .FailWith($"Cannot determine if a type has an unexpected property named {name} if the type is <null>.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                propertyInfo = Subject.FindPropertyByName(name);
 
-        if (assertionChain.Succeeded)
-        {
-            PropertyInfo propertyInfo = Subject.FindPropertyByName(name);
+                return propertyInfo is null;
+            })
+            .FailWith(() =>
+            {
+                string subjectDescription = assertionChain.HasOverriddenCallerIdentifier
+                    ? assertionChain.CallerIdentifier
+                    : Subject.ToFormattedString();
 
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(propertyInfo is null)
-                .FailWith(() =>
-                {
-                    string subjectDescription = assertionChain.HasOverriddenCallerIdentifier
-                        ? assertionChain.CallerIdentifier
-                        : Subject.ToFormattedString();
-
-                    return new FailReason(
-                        $"Did not expect {subjectDescription} to have a property {propertyInfo?.Name}{{reason}}, but it does.");
-                });
-        }
+                return new FailReason(
+                    $"Did not expect {subjectDescription} to have a property {propertyInfo?.Name}{{reason}}, but it does.");
+            });
 
         return new AndConstraint<TypeAssertions>(this);
     }
@@ -1406,30 +1405,29 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
 
         string parameterString = GetParameterString(parameterTypes);
 
+        PropertyInfo propertyInfo = null;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith(
                 $"Expected {{0}} {{context:type}}[{parameterString}] to exist{{reason}}" +
-                ", but {context:type} is <null>.", indexerType.AsFormattableShortType());
+                ", but {context:type} is <null>.", indexerType.AsFormattableShortType())
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                propertyInfo = Subject.GetIndexerByParameterTypes(parameterTypes);
 
-        PropertyInfo propertyInfo = null;
-
-        if (assertionChain.Succeeded)
-        {
-            propertyInfo = Subject.GetIndexerByParameterTypes(parameterTypes);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(propertyInfo is not null)
-                .FailWith(
-                    $"Expected {{0}} {{1}}[{parameterString}] to exist{{reason}}" +
-                    ", but it does not.", indexerType.AsFormattableShortType(), Subject)
-                .Then
-                .ForCondition(propertyInfo.PropertyType == indexerType)
-                .FailWith("Expected {0} to be of type {1}{reason}, but it is not.",
-                    propertyInfo, indexerType);
-        }
+                return propertyInfo is not null;
+            })
+            .FailWith(
+                $"Expected {{0}} {{1}}[{parameterString}] to exist{{reason}}" +
+                ", but it does not.", indexerType.AsFormattableShortType(), Subject)
+            .Then
+            .ForCondition(() => propertyInfo.PropertyType == indexerType)
+            .FailWith("Expected {0} to be of type {1}{reason}, but it is not.",
+                propertyInfo, indexerType);
 
         return new AndWhichConstraint<TypeAssertions, PropertyInfo>(this, propertyInfo, assertionChain,
             $"[{parameterString}]");
@@ -1460,19 +1458,18 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
             .ForCondition(Subject is not null)
             .FailWith(() => new FailReason(
                 $"Expected indexer {{context:type}}[{GetParameterString(parameterTypes)}] to not exist{{reason}}" +
-                ", but {context:type} is <null>."));
+                ", but {context:type} is <null>."))
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                PropertyInfo propertyInfo = Subject.GetIndexerByParameterTypes(parameterTypes);
 
-        if (assertionChain.Succeeded)
-        {
-            PropertyInfo propertyInfo = Subject.GetIndexerByParameterTypes(parameterTypes);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(propertyInfo is null)
-                .FailWith(() => new FailReason(
-                    $"Expected indexer {{0}}[{GetParameterString(parameterTypes)}] to not exist{{reason}}" +
-                    ", but it does.", Subject));
-        }
+                return propertyInfo is null;
+            })
+            .FailWith(() => new FailReason(
+                $"Expected indexer {{0}}[{GetParameterString(parameterTypes)}] to not exist{{reason}}" +
+                ", but it does.", Subject));
 
         return new AndConstraint<TypeAssertions>(this);
     }
@@ -1501,39 +1498,38 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
         Guard.ThrowIfArgumentIsNullOrEmpty(name);
         Guard.ThrowIfArgumentIsNull(parameterTypes);
 
+        MethodInfo methodInfo = null;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith(() => new FailReason(
                 $"Expected method {{context:type}}.{name}({GetParameterString(parameterTypes)}) to exist{{reason}}" +
-                ", but {context:type} is <null>."));
+                ", but {context:type} is <null>."))
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                methodInfo = Subject.GetMethod(name, parameterTypes);
 
-        MethodInfo methodInfo = null;
-
-        if (assertionChain.Succeeded)
-        {
-            methodInfo = Subject.GetMethod(name, parameterTypes);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(methodInfo is not null)
-                .FailWith(() =>
+                return methodInfo is not null;
+            })
+            .FailWith(() =>
+            {
+                string methodDescription;
+                if (methodInfo is null)
                 {
-                    string methodDescription;
-                    if (methodInfo is null)
-                    {
-                        methodDescription = $"{Subject.AsFormattableTypeDefinition().ToFormattedString()}.{name}";
-                    }
-                    else
-                    {
-                        methodDescription = MethodInfoAssertions.GetDescriptionFor(methodInfo);
-                    }
+                    methodDescription = $"{Subject.AsFormattableTypeDefinition().ToFormattedString()}.{name}";
+                }
+                else
+                {
+                    methodDescription = MethodInfoAssertions.GetDescriptionFor(methodInfo);
+                }
 
-                    return new FailReason(
-                        $"Expected method {methodDescription}({GetParameterString(parameterTypes)}) to exist{{reason}}" +
-                        ", but it does not.");
-                });
-        }
+                return new FailReason(
+                    $"Expected method {methodDescription}({GetParameterString(parameterTypes)}) to exist{{reason}}" +
+                    ", but it does not.");
+            });
 
         return new AndWhichConstraint<TypeAssertions, MethodInfo>(this, methodInfo);
     }
@@ -1562,28 +1558,29 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
         Guard.ThrowIfArgumentIsNullOrEmpty(name);
         Guard.ThrowIfArgumentIsNull(parameterTypes);
 
+        MethodInfo methodInfo = null;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith(() => new FailReason(
                 $"Expected method {{context:type}}.{name}({GetParameterString(parameterTypes)}) to not exist{{reason}}" +
-                ", but {context:type} is <null>."));
+                ", but {context:type} is <null>."))
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                methodInfo = Subject.GetMethod(name, parameterTypes);
 
-        if (assertionChain.Succeeded)
-        {
-            MethodInfo methodInfo = Subject.GetMethod(name, parameterTypes);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(methodInfo is null)
-                .FailWith(() =>
-                {
-                    string methodDescription = MethodInfoAssertions.GetDescriptionFor(methodInfo);
-                    return new FailReason(
-                        $"Expected method {methodDescription}({GetParameterString(parameterTypes)}) to not exist{{reason}}" +
-                        ", but it does.");
-                });
-        }
+                return methodInfo is null;
+            })
+            .FailWith(() =>
+            {
+                string methodDescription = MethodInfoAssertions.GetDescriptionFor(methodInfo);
+                return new FailReason(
+                    $"Expected method {methodDescription}({GetParameterString(parameterTypes)}) to not exist{{reason}}" +
+                    ", but it does.");
+            });
 
         return new AndConstraint<TypeAssertions>(this);
     }
@@ -1607,26 +1604,25 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
     {
         Guard.ThrowIfArgumentIsNull(parameterTypes);
 
+        ConstructorInfo constructorInfo = null;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith(() => new FailReason(
                 $"Expected constructor {{context:type}}({GetParameterString(parameterTypes)}) to exist{{reason}}" +
-                ", but {context:type} is <null>."));
+                ", but {context:type} is <null>."))
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                constructorInfo = Subject.GetConstructor(parameterTypes);
 
-        ConstructorInfo constructorInfo = null;
-
-        if (assertionChain.Succeeded)
-        {
-            constructorInfo = Subject.GetConstructor(parameterTypes);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(constructorInfo is not null)
-                .FailWith(() => new FailReason(
-                    $"Expected constructor {{0}}({GetParameterString(parameterTypes)}) to exist{{reason}}" +
-                    ", but it does not.", Subject));
-        }
+                return constructorInfo is not null;
+            })
+            .FailWith(() => new FailReason(
+                $"Expected constructor {{0}}({GetParameterString(parameterTypes)}) to exist{{reason}}" +
+                ", but it does not.", Subject));
 
         return new AndWhichConstraint<TypeAssertions, ConstructorInfo>(this, constructorInfo);
     }
@@ -1667,26 +1663,25 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
     {
         Guard.ThrowIfArgumentIsNull(parameterTypes);
 
+        ConstructorInfo constructorInfo = null;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith(() => new FailReason(
                 $"Expected constructor {{context:type}}({GetParameterString(parameterTypes)}) not to exist{{reason}}" +
-                ", but {context:type} is <null>."));
+                ", but {context:type} is <null>."))
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                constructorInfo = Subject.GetConstructor(parameterTypes);
 
-        ConstructorInfo constructorInfo = null;
-
-        if (assertionChain.Succeeded)
-        {
-            constructorInfo = Subject.GetConstructor(parameterTypes);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(constructorInfo is null)
-                .FailWith(() => new FailReason(
-                    $"Expected constructor {{0}}({GetParameterString(parameterTypes)}) not to exist{{reason}}" +
-                    ", but it does.", Subject));
-        }
+                return constructorInfo is null;
+            })
+            .FailWith(() => new FailReason(
+                $"Expected constructor {{0}}({GetParameterString(parameterTypes)}) not to exist{{reason}}" +
+                ", but it does.", Subject));
 
         return new AndWhichConstraint<TypeAssertions, ConstructorInfo>(this, constructorInfo);
     }
@@ -1733,22 +1728,23 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
     {
         Guard.ThrowIfArgumentIsOutOfRange(accessModifier);
 
+        CSharpAccessModifier subjectAccessModifier = default;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith($"Expected {{context:type}} to be {accessModifier}{{reason}}, but {{context:type}} is <null>.");
+            .FailWith($"Expected {{context:type}} to be {accessModifier}{{reason}}, but {{context:type}} is <null>.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                subjectAccessModifier = Subject.GetCSharpAccessModifier();
 
-        if (assertionChain.Succeeded)
-        {
-            CSharpAccessModifier subjectAccessModifier = Subject.GetCSharpAccessModifier();
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(accessModifier == subjectAccessModifier)
-                .FailWith(
-                    $"Expected {{context:type}} {{0}} to be {accessModifier}{{reason}}" +
-                    $", but it is {subjectAccessModifier}.", Subject);
-        }
+                return accessModifier == subjectAccessModifier;
+            })
+            .FailWith(
+                $"Expected {{context:type}} {{0}} to be {accessModifier}{{reason}}" +
+                $", but it is {subjectAccessModifier}.", Subject);
 
         return new AndConstraint<TypeAssertions>(this);
     }
@@ -1776,18 +1772,17 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
-            .FailWith($"Expected {{context:type}} not to be {accessModifier}{{reason}}, but {{context:type}} is <null>.");
+            .FailWith($"Expected {{context:type}} not to be {accessModifier}{{reason}}, but {{context:type}} is <null>.")
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                CSharpAccessModifier subjectAccessModifier = Subject.GetCSharpAccessModifier();
 
-        if (assertionChain.Succeeded)
-        {
-            CSharpAccessModifier subjectAccessModifier = Subject.GetCSharpAccessModifier();
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(accessModifier != subjectAccessModifier)
-                .FailWith($"Expected {{context:type}} {{0}} not to be {accessModifier}{{reason}}, but it is.",
-                    Subject);
-        }
+                return accessModifier != subjectAccessModifier;
+            })
+            .FailWith($"Expected {{context:type}} {{0}} not to be {accessModifier}{{reason}}, but it is.",
+                Subject);
 
         return new AndConstraint<TypeAssertions>(this);
     }
@@ -1835,24 +1830,23 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
         Guard.ThrowIfArgumentIsNull(sourceType);
         Guard.ThrowIfArgumentIsNull(targetType);
 
+        MethodInfo methodInfo = null;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith("Expected public static implicit {0}({1}) to exist{reason}, but {context:type} is <null>.",
+                targetType, sourceType)
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                methodInfo = Subject.GetImplicitConversionOperator(sourceType, targetType);
+
+                return methodInfo is not null;
+            })
+            .FailWith("Expected public static implicit {0}({1}) to exist{reason}, but it does not.",
                 targetType, sourceType);
-
-        MethodInfo methodInfo = null;
-
-        if (assertionChain.Succeeded)
-        {
-            methodInfo = Subject.GetImplicitConversionOperator(sourceType, targetType);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(methodInfo is not null)
-                .FailWith("Expected public static implicit {0}({1}) to exist{reason}, but it does not.",
-                    targetType, sourceType);
-        }
 
         return new AndWhichConstraint<TypeAssertions, MethodInfo>(this, methodInfo, assertionChain);
     }
@@ -1904,18 +1898,17 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith("Expected public static implicit {0}({1}) to not exist{reason}, but {context:type} is <null>.",
+                targetType, sourceType)
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                MethodInfo methodInfo = Subject.GetImplicitConversionOperator(sourceType, targetType);
+
+                return methodInfo is null;
+            })
+            .FailWith("Expected public static implicit {0}({1}) to not exist{reason}, but it does.",
                 targetType, sourceType);
-
-        if (assertionChain.Succeeded)
-        {
-            MethodInfo methodInfo = Subject.GetImplicitConversionOperator(sourceType, targetType);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(methodInfo is null)
-                .FailWith("Expected public static implicit {0}({1}) to not exist{reason}, but it does.",
-                    targetType, sourceType);
-        }
 
         return new AndConstraint<TypeAssertions>(this);
     }
@@ -1963,24 +1956,23 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
         Guard.ThrowIfArgumentIsNull(sourceType);
         Guard.ThrowIfArgumentIsNull(targetType);
 
+        MethodInfo methodInfo = null;
+
         assertionChain
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith("Expected public static explicit {0}({1}) to exist{reason}, but {context:type} is <null>.",
+                targetType, sourceType)
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                methodInfo = Subject.GetExplicitConversionOperator(sourceType, targetType);
+
+                return methodInfo is not null;
+            })
+            .FailWith("Expected public static explicit {0}({1}) to exist{reason}, but it does not.",
                 targetType, sourceType);
-
-        MethodInfo methodInfo = null;
-
-        if (assertionChain.Succeeded)
-        {
-            methodInfo = Subject.GetExplicitConversionOperator(sourceType, targetType);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(methodInfo is not null)
-                .FailWith("Expected public static explicit {0}({1}) to exist{reason}, but it does not.",
-                    targetType, sourceType);
-        }
 
         return new AndWhichConstraint<TypeAssertions, MethodInfo>(this, methodInfo);
     }
@@ -2032,18 +2024,17 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
             .BecauseOf(because, becauseArgs)
             .ForCondition(Subject is not null)
             .FailWith("Expected public static explicit {0}({1}) to not exist{reason}, but {context:type} is <null>.",
+                targetType, sourceType)
+            .Then
+            .BecauseOf(because, becauseArgs)
+            .ForCondition(() =>
+            {
+                MethodInfo methodInfo = Subject.GetExplicitConversionOperator(sourceType, targetType);
+
+                return methodInfo is null;
+            })
+            .FailWith("Expected public static explicit {0}({1}) to not exist{reason}, but it does.",
                 targetType, sourceType);
-
-        if (assertionChain.Succeeded)
-        {
-            MethodInfo methodInfo = Subject.GetExplicitConversionOperator(sourceType, targetType);
-
-            assertionChain
-                .BecauseOf(because, becauseArgs)
-                .ForCondition(methodInfo is null)
-                .FailWith("Expected public static explicit {0}({1}) to not exist{reason}, but it does.",
-                    targetType, sourceType);
-        }
 
         return new AndConstraint<TypeAssertions>(this);
     }
