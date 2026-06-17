@@ -1461,12 +1461,7 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
                 ", but {context:type} is <null>."))
             .Then
             .BecauseOf(because, becauseArgs)
-            .ForCondition(() =>
-            {
-                PropertyInfo propertyInfo = Subject.GetIndexerByParameterTypes(parameterTypes);
-
-                return propertyInfo is null;
-            })
+            .ForCondition(() => Subject.GetIndexerByParameterTypes(parameterTypes) is null)
             .FailWith(() => new FailReason(
                 $"Expected indexer {{0}}[{GetParameterString(parameterTypes)}] to not exist{{reason}}" +
                 ", but it does.", Subject));
@@ -1775,12 +1770,7 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
             .FailWith($"Expected {{context:type}} not to be {accessModifier}{{reason}}, but {{context:type}} is <null>.")
             .Then
             .BecauseOf(because, becauseArgs)
-            .ForCondition(() =>
-            {
-                CSharpAccessModifier subjectAccessModifier = Subject.GetCSharpAccessModifier();
-
-                return accessModifier != subjectAccessModifier;
-            })
+            .ForCondition(() => accessModifier != Subject.GetCSharpAccessModifier())
             .FailWith($"Expected {{context:type}} {{0}} not to be {accessModifier}{{reason}}, but it is.",
                 Subject);
 
@@ -1901,12 +1891,7 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
                 targetType, sourceType)
             .Then
             .BecauseOf(because, becauseArgs)
-            .ForCondition(() =>
-            {
-                MethodInfo methodInfo = Subject.GetImplicitConversionOperator(sourceType, targetType);
-
-                return methodInfo is null;
-            })
+            .ForCondition(() => Subject.GetImplicitConversionOperator(sourceType, targetType) is null)
             .FailWith("Expected public static implicit {0}({1}) to not exist{reason}, but it does.",
                 targetType, sourceType);
 
@@ -2027,12 +2012,7 @@ public class TypeAssertions : ReferenceTypeAssertions<Type, TypeAssertions>
                 targetType, sourceType)
             .Then
             .BecauseOf(because, becauseArgs)
-            .ForCondition(() =>
-            {
-                MethodInfo methodInfo = Subject.GetExplicitConversionOperator(sourceType, targetType);
-
-                return methodInfo is null;
-            })
+            .ForCondition(() => Subject.GetExplicitConversionOperator(sourceType, targetType) is null)
             .FailWith("Expected public static explicit {0}({1}) to not exist{reason}, but it does.",
                 targetType, sourceType);
 
