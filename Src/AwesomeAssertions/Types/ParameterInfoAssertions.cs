@@ -146,12 +146,7 @@ public sealed class ParameterInfoAssertions : ReferenceTypeAssertions<ParameterI
                "Did not expect parameter to be decorated with {0}{reason}" +
                ", but found {context:parameter} is <null>.", typeof(TAttribute))
             .Then
-            .ForCondition(() =>
-            {
-                IEnumerable<TAttribute> attributes = Subject.GetCustomAttributes<TAttribute>();
-
-                return !attributes.Any();
-            })
+            .ForCondition(() => !Subject.GetCustomAttributes<TAttribute>().Any())
             .FailWith(() => new FailReason(
                 $"Did not expect {SubjectDescription} to be decorated with {{0}}{{reason}}" +
                 ", but that attribute was found.", typeof(TAttribute)));
