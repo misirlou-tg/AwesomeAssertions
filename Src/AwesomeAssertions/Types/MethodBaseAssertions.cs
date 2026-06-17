@@ -100,12 +100,7 @@ public abstract class MethodBaseAssertions<TSubject, TAssertions> : MemberInfoAs
             .ForCondition(Subject is not null)
             .FailWith($"Expected method not to be {accessModifier}{{reason}}, but {{context:member}} is <null>.")
             .Then
-            .ForCondition(() =>
-            {
-                CSharpAccessModifier subjectAccessModifier = Subject.GetCSharpAccessModifier();
-
-                return accessModifier != subjectAccessModifier;
-            })
+            .ForCondition(() => accessModifier != Subject.GetCSharpAccessModifier())
             .BecauseOf(because, becauseArgs)
             .FailWith(() =>
             {
