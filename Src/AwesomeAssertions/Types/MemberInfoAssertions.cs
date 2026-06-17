@@ -144,12 +144,7 @@ public abstract class MemberInfoAssertions<TSubject, TAssertions> : ReferenceTyp
                 $"Expected {Identifier} to not be decorated with {{0}}{{reason}}" +
                 ", but {context:member} is <null>.", typeof(TAttribute))
             .Then
-            .ForCondition(() =>
-            {
-                IEnumerable<TAttribute> attributes = Subject.GetMatchingAttributes(isMatchingAttributePredicate);
-
-                return !attributes.Any();
-            })
+            .ForCondition(() => !Subject.GetMatchingAttributes(isMatchingAttributePredicate).Any())
             .BecauseOf(because, becauseArgs)
             .FailWith(() => new FailReason(
                 $"Expected {Identifier} {SubjectDescription} to not be decorated with {{0}}{{reason}}" +
